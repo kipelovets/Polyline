@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 import Foundation
-import MapKit
 
 // MARK: - Public Classes -
 
