@@ -20,10 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import CoreLocation
 import XCTest
 
-import Polyline
+@testable import Polyline
 
 private let COORD_EPSILON: Double = 0.00001
 
@@ -36,76 +35,76 @@ class FunctionalPolylineTests : XCTestCase {
     }
     
     func testZeroShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0, longitude: 0)]
+        let coordinates = [GeoCoordinate2D(latitude: 0, longitude: 0)]
         XCTAssertEqual(encodeCoordinates(coordinates), "??")
     }
     
     func testMinimalPositiveDifferenceShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001)]
         XCTAssertEqual(encodeCoordinates(coordinates), "AA")
     }
     
     func testLowRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000014, longitude: 0.000014)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000014, longitude: 0.000014)]
         XCTAssertEqual(encodeCoordinates(coordinates), "AA")
     }
     
     func testMidRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000015, longitude: 0.000015)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000015, longitude: 0.000015)]
         XCTAssertEqual(encodeCoordinates(coordinates), "CC")
     }
     
     func testHighRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000016, longitude: 0.000016)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000016, longitude: 0.000016)]
         XCTAssertEqual(encodeCoordinates(coordinates), "CC")
     }
     
     func testMinimalNegativeDifferenceShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.00001, longitude: -0.00001)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.00001, longitude: -0.00001)]
         XCTAssertEqual(encodeCoordinates(coordinates), "@@")
     }
     
     func testLowNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000014, longitude: -0.000014)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000014, longitude: -0.000014)]
         XCTAssertEqual(encodeCoordinates(coordinates), "@@")
     }
     
     func testMidNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000015, longitude: -0.000015)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000015, longitude: -0.000015)]
         XCTAssertEqual(encodeCoordinates(coordinates), "BB")
     }
     
     func testHighNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000016, longitude: -0.000016)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000016, longitude: -0.000016)]
         XCTAssertEqual(encodeCoordinates(coordinates), "BB")
     }
     
     func testSmallIncrementLocationArrayShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001),
-            CLLocationCoordinate2D(latitude: 0.00002, longitude: 0.00002)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001),
+            GeoCoordinate2D(latitude: 0.00002, longitude: 0.00002)]
         XCTAssertEqual(encodeCoordinates(coordinates), "AAAA")
     }
     
     func testSmallDecrementLocationArrayShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001),
-            CLLocationCoordinate2D(latitude: 0.00000, longitude: 0.00000)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001),
+            GeoCoordinate2D(latitude: 0.00000, longitude: 0.00000)]
         XCTAssertEqual(encodeCoordinates(coordinates), "AA@@")
     }
     
     // MARK: - Decoding Coordinates
     
     func testEmptyPolylineShouldBeEmptyLocationArray() {
-        let coordinates: [CLLocationCoordinate2D] = decodePolyline("")!
+        let coordinates: [GeoCoordinate2D] = decodePolyline("")!
         
         XCTAssertEqual(coordinates.count, 0)
     }
     
     func testInvalidPolylineShouldReturnEmptyLocationArray() {
-        XCTAssertNil(decodePolyline("invalidPolylineString") as [CLLocationCoordinate2D]?)
+        XCTAssertNil(decodePolyline("invalidPolylineString") as [GeoCoordinate2D]?)
     }
     
     func testValidPolylineShouldReturnValidLocationArray() {
-        let coordinates: [CLLocationCoordinate2D] = decodePolyline("_p~iF~ps|U_ulLnnqC_mqNvxq`@")!
+        let coordinates: [GeoCoordinate2D] = decodePolyline("_p~iF~ps|U_ulLnnqC_mqNvxq`@")!
         
         XCTAssertEqual(coordinates.count, 3)
         XCTAssertEqual(coordinates[0].latitude, 38.5, accuracy: COORD_EPSILON)
@@ -117,7 +116,7 @@ class FunctionalPolylineTests : XCTestCase {
     }
     
     func testAnotherValidPolylineShouldReturnValidLocationArray() {
-        let coordinates: [CLLocationCoordinate2D] = decodePolyline("_ojiHa`tLh{IdCw{Gwc_@")!
+        let coordinates: [GeoCoordinate2D] = decodePolyline("_ojiHa`tLh{IdCw{Gwc_@")!
         
         XCTAssertEqual(coordinates.count, 3)
         XCTAssertEqual(coordinates[0].latitude, 48.8832,  accuracy: COORD_EPSILON)
@@ -171,11 +170,11 @@ class FunctionalPolylineTests : XCTestCase {
     }
     
     // MARK: - Encoding Locations
-    func testLocationsArrayShouldBeEncodedProperly() {
-        let locations = [CLLocation(latitude: 0.00001, longitude: 0.00001),
-            CLLocation(latitude: 0.00000, longitude: 0.00000)]
-        
-        XCTAssertEqual(encodeLocations(locations), "AA@@")
-    }
+//    func testLocationsArrayShouldBeEncodedProperly() {
+//        let locations = [CLLocation(latitude: 0.00001, longitude: 0.00001),
+//            CLLocation(latitude: 0.00000, longitude: 0.00000)]
+//
+//        XCTAssertEqual(encodeLocations(locations), "AA@@")
+//    }
     
 }

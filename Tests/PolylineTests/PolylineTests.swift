@@ -20,10 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import CoreLocation
 import XCTest
 
-import Polyline
+@testable import Polyline
 
 private let COORD_EPSILON_1e5: Double = 0.00001
 private let COORD_EPSILON_1e6: Double = 0.000001
@@ -38,86 +37,86 @@ class PolylineTests:XCTestCase {
     }
     
     func testZeroShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0, longitude: 0)]
+        let coordinates = [GeoCoordinate2D(latitude: 0, longitude: 0)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "??")
     }
     
     func testMinimalPositiveDifferenceShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "AA")
     }
     
     func testLowRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000014, longitude: 0.000014)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000014, longitude: 0.000014)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "AA")
     }
     
     func testMidRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000015, longitude: 0.000015)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000015, longitude: 0.000015)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "CC")
     }
     
     func testHighRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.000016, longitude: 0.000016)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.000016, longitude: 0.000016)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "CC")
     }
     
     func testMinimalNegativeDifferenceShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.00001, longitude: -0.00001)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.00001, longitude: -0.00001)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "@@")
     }
     
     func testLowNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000014, longitude: -0.000014)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000014, longitude: -0.000014)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "@@")
     }
     
     func testMidNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000015, longitude: -0.000015)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000015, longitude: -0.000015)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "BB")
     }
     
     func testHighNegativeRoundedValuesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: -0.000016, longitude: -0.000016)]
+        let coordinates = [GeoCoordinate2D(latitude: -0.000016, longitude: -0.000016)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "BB")
     }
     
     func testSmallIncrementLocationArrayShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001),
-            CLLocationCoordinate2D(latitude: 0.00002, longitude: 0.00002)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001),
+            GeoCoordinate2D(latitude: 0.00002, longitude: 0.00002)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "AAAA")
     }
     
     func testSmallDecrementLocationArrayShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 0.00001, longitude: 0.00001),
-            CLLocationCoordinate2D(latitude: 0.00000, longitude: 0.00000)]
+        let coordinates = [GeoCoordinate2D(latitude: 0.00001, longitude: 0.00001),
+            GeoCoordinate2D(latitude: 0.00000, longitude: 0.00000)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "AA@@")
     }
     
     func testPrecisionShouldBeUsedProperlyInEncoding() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 10.1234567, longitude:10.1234567)]
+        let coordinates = [GeoCoordinate2D(latitude: 10.1234567, longitude:10.1234567)]
         
         var sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "sfx|@sfx|@")
@@ -248,21 +247,21 @@ class PolylineTests:XCTestCase {
     }
 
     // MARK:- Encoding Locations
-    func testLocationsArrayShouldBeEncodedProperly() {
-        let locations = [CLLocation(latitude: 0.00001, longitude: 0.00001),
-            CLLocation(latitude: 0.00000, longitude: 0.00000)]
-        
-        let sut = Polyline(locations: locations)
-        XCTAssertEqual(sut.encodedPolyline, "AA@@")
-    }
+//    func testLocationsArrayShouldBeEncodedProperly() {
+//        let locations = [CLLocation(latitude: 0.00001, longitude: 0.00001),
+//            CLLocation(latitude: 0.00000, longitude: 0.00000)]
+//
+//        let sut = Polyline(locations: locations)
+//        XCTAssertEqual(sut.encodedPolyline, "AA@@")
+//    }
     
     // MARK:- Issues non-regression tests
     
     // Github Issue 1
     func testSmallNegativeDifferencesShouldBeEncodedProperly() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 37.32721043, longitude: 122.02685069),
-            CLLocationCoordinate2D(latitude: 37.32727259, longitude: 122.02685280),
-            CLLocationCoordinate2D(latitude: 37.32733398, longitude: 122.02684998)]
+        let coordinates = [GeoCoordinate2D(latitude: 37.32721043, longitude: 122.02685069),
+            GeoCoordinate2D(latitude: 37.32727259, longitude: 122.02685280),
+            GeoCoordinate2D(latitude: 37.32733398, longitude: 122.02684998)]
         
         let sut = Polyline(coordinates: coordinates)
         XCTAssertEqual(sut.encodedPolyline, "anybFyjxgVK?K?")
@@ -270,7 +269,7 @@ class PolylineTests:XCTestCase {
     
     // Github Issue 3
     func testLimitValueIsProperlyEncoded() {
-        let sourceCoordinates = [CLLocationCoordinate2D(latitude: 0.00016, longitude: -0.00032)]
+        let sourceCoordinates = [GeoCoordinate2D(latitude: 0.00016, longitude: -0.00032)]
         
         let sut = Polyline(coordinates: sourceCoordinates)
         XCTAssertEqual(sut.encodedPolyline, "_@~@")
@@ -279,7 +278,7 @@ class PolylineTests:XCTestCase {
     // Github issue 4
     func testPrecisionIsUsedProperly() {
         let encoded = "}gqefAridwgFrYEAhfA{@jDsAxBoBzBaDtB{iAX{c@EsU]uf@?_WR~@tPlTFfg@?jUNj|@eBtu@K?z]cAjLkDlJuFjGyG`IyCjIsAlM?|k@v@|dArQbv@k@jIpA?"
-        let sut : [CLLocationCoordinate2D] = decodePolyline(encoded, precision: 1e6)!
+        let sut : [GeoCoordinate2D] = decodePolyline(encoded, precision: 1e6)!
         
         XCTAssertEqual(sut.count, 30)
         XCTAssertEqual(sut[0].latitude, 37.332111, accuracy: COORD_EPSILON_1e6)
@@ -296,24 +295,24 @@ class PolylineTests:XCTestCase {
     // MARK:- README code samples
     
     func testCoordinatesEncoding() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 40.2349727, longitude: -3.7707443),
-            CLLocationCoordinate2D(latitude: 44.3377999, longitude: 1.2112933)]
+        let coordinates = [GeoCoordinate2D(latitude: 40.2349727, longitude: -3.7707443),
+            GeoCoordinate2D(latitude: 44.3377999, longitude: 1.2112933)]
         
         let polyline = Polyline(coordinates: coordinates)
         XCTAssertEqual(polyline.encodedPolyline, "qkqtFbn_Vui`Xu`l]")
     }
     
-    func testLocationsEncoding() {
-        let locations = [CLLocation(latitude: 40.2349727, longitude: -3.7707443),
-            CLLocation(latitude: 44.3377999, longitude: 1.2112933)]
-        
-        let polyline = Polyline(locations: locations)
-        XCTAssertEqual(polyline.encodedPolyline, "qkqtFbn_Vui`Xu`l]")
-    }
+//    func testLocationsEncoding() {
+//        let locations = [CLLocation(latitude: 40.2349727, longitude: -3.7707443),
+//            CLLocation(latitude: 44.3377999, longitude: 1.2112933)]
+//
+//        let polyline = Polyline(locations: locations)
+//        XCTAssertEqual(polyline.encodedPolyline, "qkqtFbn_Vui`Xu`l]")
+//    }
     
     func testLevelEncoding() {
-        let coordinates = [CLLocationCoordinate2D(latitude: 40.2349727, longitude: -3.7707443),
-            CLLocationCoordinate2D(latitude: 44.3377999, longitude: 1.2112933)]
+        let coordinates = [GeoCoordinate2D(latitude: 40.2349727, longitude: -3.7707443),
+            GeoCoordinate2D(latitude: 44.3377999, longitude: 1.2112933)]
         
         let levels: [UInt32] = [0,1,2,255]
         
@@ -324,16 +323,16 @@ class PolylineTests:XCTestCase {
     func testPolylineDecodingToCoordinate() {
         let polyline = Polyline(encodedPolyline: "qkqtFbn_Vui`Xu`l]")
         
-        let decodedCoordinates: [CLLocationCoordinate2D]? = polyline.coordinates
+        let decodedCoordinates: [GeoCoordinate2D]? = polyline.coordinates
         XCTAssertEqual(2, decodedCoordinates!.count)
     }
     
-    func testPolylineDecodingToLocations() {
-        let polyline = Polyline(encodedPolyline: "qkqtFbn_Vui`Xu`l]")
-        let decodedLocations: [CLLocation]? = polyline.locations
-        
-        XCTAssertEqual(2, decodedLocations!.count)
-    }
+//    func testPolylineDecodingToLocations() {
+//        let polyline = Polyline(encodedPolyline: "qkqtFbn_Vui`Xu`l]")
+//        let decodedLocations: [CLLocation]? = polyline.locations
+//
+//        XCTAssertEqual(2, decodedLocations!.count)
+//    }
     
     func testLevelDecoding() {
         let polyline = Polyline(encodedPolyline: "qkqtFbn_Vui`Xu`l]", encodedLevels: "BA")

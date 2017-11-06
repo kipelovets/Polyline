@@ -21,10 +21,33 @@
 // SOFTWARE.
 
 import Foundation
-import CoreLocation
 import MapKit
 
 // MARK: - Public Classes -
+
+public enum GeoCoordinate2DError: Error {
+    case invalidLatitude
+    case invalidLongitude
+}
+
+public struct GeoCoordinate2D {
+    public let latitude: Double
+    public let longitude: Double
+    
+    public init(latitude: Double, longitude: Double) throws {
+        
+        guard abs(latitude) <= 90 else {
+            throw GeoCoordinate2DError.invalidLatitude
+        }
+        
+        guard abs(longitude) <= 180 else {
+            throw GeoCoordinate2DError.invalidLongitude
+        }
+        
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+}
 
 /// This class can be used for :
 ///
@@ -41,7 +64,7 @@ import MapKit
 public struct Polyline {
     
     /// The array of coordinates (nil if polyline cannot be decoded)
-    public let coordinates: [CLLocationCoordinate2D]?
+    public let coordinates: [GeoCoordinate2D]?
     /// The encoded polyline
     public let encodedPolyline: String
     
@@ -50,29 +73,14 @@ public struct Polyline {
     /// The encoded levels (nil if cannot be encoded, or is not provided)
     public let encodedLevels: String?
     
-    /// The array of location (computed from coordinates)
-    public var locations: [CLLocation]? {
-        return self.coordinates.map(toLocations)
-    }
-    
-    #if !os(watchOS)
-    /// Convert polyline to MKPolyline to use with MapKit (nil if polyline cannot be decoded)
-    @available(tvOS 9.2, *)
-    public var mkPolyline: MKPolyline? {
-        guard let coordinates = self.coordinates else { return nil }
-        let mkPolyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
-        return mkPolyline
-    }
-    #endif
-    
     // MARK: - Public Methods -
     
-    /// This designated initializer encodes a `[CLLocationCoordinate2D]`
+    /// This designated initializer encodes a `[GeoCoordinate2D]`
     ///
-    /// - parameter coordinates: The `Array` of `CLLocationCoordinate2D` that you want to encode
+    /// - parameter coordinates: The `Array` of `GeoCoordinate2D` that you want to encode
     /// - parameter levels: The optional `Array` of levels  that you want to encode (default: `nil`)
     /// - parameter precision: The precision used for encoding (default: `1e5`)
-    public init(coordinates: [CLLocationCoordinate2D], levels: [UInt32]? = nil, precision: Double = 1e5) {
+    public init(coordinates: [GeoCoordinate2D], levels: [UInt32]? = nil, precision: Double = 1e5) {
         
         self.coordinates = coordinates
         self.levels = levels
@@ -96,17 +104,6 @@ public struct Polyline {
 
         levels = self.encodedLevels.flatMap(decodeLevels)
     }
-    
-    /// This init encodes a `[CLLocation]`
-    ///
-    /// - parameter locations: The `Array` of `CLLocation` that you want to encode
-    /// - parameter levels: The optional array of levels  that you want to encode (default: `nil`)
-    /// - parameter precision: The precision used for encoding (default: `1e5`)
-    public init(locations: [CLLocation], levels: [UInt32]? = nil, precision: Double = 1e5) {
-        
-        let coordinates = toCoordinates(locations)
-        self.init(coordinates: coordinates, levels: levels, precision:precision)
-    }
 }
 
 // MARK: - Public Functions -
@@ -117,7 +114,7 @@ public struct Polyline {
 /// - parameter precision: The precision used to encode coordinates (default: `1e5`)
 ///
 /// - returns: A `String` representing the encoded Polyline
-public func encodeCoordinates(_ coordinates: [CLLocationCoordinate2D], precision: Double = 1e5) -> String {
+public func encodeCoordinates(_ coordinates: [GeoCoordinate2D], precision: Double = 1e5) -> String {
     
     var previousCoordinate = IntegerCoordinates(0, 0)
     var encodedPolyline = ""
@@ -136,17 +133,6 @@ public func encodeCoordinates(_ coordinates: [CLLocationCoordinate2D], precision
     return encodedPolyline
 }
 
-/// This function encodes an `[CLLocation]` to a `String`
-///
-/// - parameter coordinates: The `Array` of `CLLocation` that you want to encode
-/// - parameter precision: The precision used to encode locations (default: `1e5`)
-///
-/// - returns: A `String` representing the encoded Polyline
-public func encodeLocations(_ locations: [CLLocation], precision: Double = 1e5) -> String {
-    
-    return encodeCoordinates(toCoordinates(locations), precision: precision)
-}
-
 /// This function encodes an `[UInt32]` to a `String`
 ///
 /// - parameter levels: The `Array` of `UInt32` levels that you want to encode
@@ -158,13 +144,13 @@ public func encodeLevels(_ levels: [UInt32]) -> String {
     }
 }
 
-/// This function decodes a `String` to a `[CLLocationCoordinate2D]?`
+/// This function decodes a `String` to a `[GeoCoordinate2D]?`
 ///
 /// - parameter encodedPolyline: `String` representing the encoded Polyline
 /// - parameter precision: The precision used to decode coordinates (default: `1e5`)
 ///
-/// - returns: A `[CLLocationCoordinate2D]` representing the decoded polyline if valid, `nil` otherwise
-public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -> [CLLocationCoordinate2D]? {
+/// - returns: A `[GeoCoordinate2D]` representing the decoded polyline if valid, `nil` otherwise
+public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -> [GeoCoordinate2D]? {
     
     let data = encodedPolyline.data(using: String.Encoding.utf8)!
     
@@ -172,7 +158,7 @@ public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -
     let length = Int(data.count)
     var position = Int(0)
     
-    var decodedCoordinates = [CLLocationCoordinate2D]()
+    var decodedCoordinates = [GeoCoordinate2D]()
     
     var lat = 0.0
     var lon = 0.0
@@ -189,21 +175,10 @@ public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -
             return nil
         }
 
-        decodedCoordinates.append(CLLocationCoordinate2D(latitude: lat, longitude: lon))
+        decodedCoordinates.append(try! GeoCoordinate2D(latitude: lat, longitude: lon))
     }
     
     return decodedCoordinates
-}
-
-/// This function decodes a String to a [CLLocation]?
-///
-/// - parameter encodedPolyline: String representing the encoded Polyline
-/// - parameter precision: The precision used to decode locations (default: 1e5)
-///
-/// - returns: A [CLLocation] representing the decoded polyline if valid, nil otherwise
-public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -> [CLLocation]? {
-    
-    return decodePolyline(encodedPolyline, precision: precision).map(toLocations)
 }
 
 /// This function decodes a `String` to an `[UInt32]`
@@ -368,16 +343,6 @@ private func agregateScalarArray(_ scalars: [UnicodeScalar]) -> Int32 {
 enum PolylineError: Error {
     case singleCoordinateDecodingError
     case chunkExtractingError
-}
-
-private func toCoordinates(_ locations: [CLLocation]) -> [CLLocationCoordinate2D] {
-    return locations.map {location in location.coordinate}
-}
-
-private func toLocations(_ coordinates: [CLLocationCoordinate2D]) -> [CLLocation] {
-    return coordinates.map { coordinate in
-        CLLocation(latitude:coordinate.latitude, longitude:coordinate.longitude)
-    }
 }
 
 private func isSeparator(_ value: Int32) -> Bool {
