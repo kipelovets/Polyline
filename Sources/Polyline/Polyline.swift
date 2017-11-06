@@ -153,7 +153,7 @@ public func decodePolyline(_ encodedPolyline: String, precision: Double = 1e5) -
     
     let data = encodedPolyline.data(using: String.Encoding.utf8)!
     
-    let byteArray = (data as NSData).bytes.assumingMemoryBound(to: Int8.self)
+    let byteArray = [UInt8](data)
     let length = Int(data.count)
     var position = Int(0)
     
@@ -263,15 +263,15 @@ private func encodeFiveBitComponents(_ value: Int) -> String {
 
 // We use a byte array (UnsafePointer<Int8>) here for performance reasons. Check with swift 2 if we can
 // go back to using [Int8]
-private func decodeSingleCoordinate(byteArray: UnsafePointer<Int8>, length: Int, position: inout Int, precision: Double = 1e5) throws -> Double {
+private func decodeSingleCoordinate(byteArray: [UInt8], length: Int, position: inout Int, precision: Double = 1e5) throws -> Double {
     
     guard position < length else { throw PolylineError.singleCoordinateDecodingError }
     
-    let bitMask = Int8(0x1F)
+    let bitMask = UInt8(0x1F)
     
     var coordinate: Int32 = 0
     
-    var currentChar: Int8
+    var currentChar: UInt8
     var componentCounter: Int32 = 0
     var component: Int32 = 0
     
